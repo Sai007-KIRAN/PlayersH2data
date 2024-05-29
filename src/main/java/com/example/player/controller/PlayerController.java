@@ -40,7 +40,7 @@ public class PlayerController {
     }
 
     @DeleteMapping("/players/{playerId}")
-    public ArrayList<Player> deletePlayer(@PathVariable("playerId") int playerId) {
-        return ps.deletePlayer(playerId);
+    public void deletePlayer(@PathVariable int playerId) {
+        ps.deletePlayer(playerId);
     }
 }
