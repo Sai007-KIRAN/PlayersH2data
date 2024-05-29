@@ -14,5 +14,5 @@ public interface PlayerRepository {
 
     Player updatePlayer(int playerId, Player player);
 
-    ArrayList<Player> deletePlayer(int playerId);
+    void deletePlayer(int playerId);
 }
