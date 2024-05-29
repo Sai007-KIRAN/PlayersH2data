@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
-
+import org.springframework.dao.EmptyResultDataAccessException;
 import com.example.player.model.PlayerRowMapper;
 import com.example.player.model.Player;
 import com.example.player.repository.PlayerRepository;
@@ -45,27 +45,34 @@ public class PlayerH2Service implements PlayerRepository {
     @Override
     public Player updatePlayer(int playerId, Player player) {
 
-        Player upPlay = db.queryForObject("SELECT * FROM TEAM WHERE PlayerId = ?", new PlayerRowMapper(), playerId);
-        if (upPlay == null) {
+        // Player upPlay = db.queryForObject("SELECT * FROM TEAM where playerId = ?",
+        // new PlayerRowMapper(), playerId);
+        // if (upPlay == null) {
+        // throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        // }
+
+        try {
+            Player existing = db.queryForObject("SELECT * FROM TEAM WHERE playerId = ?", new PlayerRowMapper(),
+                    playerId);
+        } catch (EmptyResultDataAccessException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         if (player.getPlayerName() != null) {
-            db.update("UPDATE TEAM  SET playerName = ?", player.getPlayerName(), playerId);
+            db.update("UPDATE TEAM  SET playerName = ? where playerId =? ", player.getPlayerName(), playerId);
         }
-        if (player.getJerseyNumber() >= 0) {
-            db.update("UPDATE TEAM  SET jerseyNumber = ?", player.getJerseyNumber(), playerId);
+        if (player.getJerseyNumber() != 0) {
+            db.update("UPDATE TEAM  SET jerseyNumber = ? where playerId =?", player.getJerseyNumber(), playerId);
         }
         if (player.getRole() != null) {
-            db.update("UPDATE TEAM  SET role = ?", player.getRole(), playerId);
+            db.update("UPDATE TEAM  SET role = ? where playerId =?", player.getRole(), playerId);
         }
+        // return db.queryForObject("SELECT * FROM TEAM WHERE playerId = ?", new
+        // PlayerRowMapper(), playerId);
         return getPlayer(playerId);
     }
 
     @Override
-    public ArrayList<Player> deletePlayer(int playerId) {
-        db.update("DELETE FROM TEAM WHERE playerId = ?", playerId);
-        List<Player> delPlayer = db.query("SELECT * FROM TEAM", new PlayerRowMapper());
-        ArrayList<Player> deleting = new ArrayList<>(delPlayer);
-        return deleting;
+    public void deletePlayer(int playerId) {
+        db.update("delete from team where playerId = ?", playerId);
     }
 }
